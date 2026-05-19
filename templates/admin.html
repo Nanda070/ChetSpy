@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <h2 class="text-2xl font-bold text-white mb-6 tracking-tight">Управление доступами</h2>
+    <div class="glass-panel rounded-xl overflow-hidden">
+        <table class="w-full text-left text-sm text-gray-300">
+            <thead class="text-xs text-gray-400 border-b border-white/10 bg-black/20">
+                <tr>
+                    <th class="p-5 font-medium">Discord ID</th>
+                    <th class="p-5 font-medium">Пользователь</th>
+                    <th class="p-5 font-medium text-right">Уровень доступа</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-white/5">
+                {% for u in users %}
+                <tr class="hover:bg-white/5 transition-colors">
+                    <td class="p-5 font-mono text-gray-500 text-xs">{{ u.discord_id }}</td>
+                    <td class="p-5 font-medium text-white">{{ u.username }}</td>
+                    <td class="p-5 flex justify-end items-center">
+                        {% if u.discord_id == user.discord_id %}
+                            <span class="px-3 py-1 text-xs text-brand border border-brand/30 bg-brand/10 rounded font-medium">Root (Текущий)</span>
+                        {% else %}
+                            <form action="/admin/update_role/{{ u.discord_id }}" method="POST" class="flex gap-3">
+                                <select name="role" class="input-glass rounded px-2 py-1.5 text-xs w-40 cursor-pointer">
+                                    <option value="user" {% if u.role == 'user' %}selected{% endif %} class="bg-gray-900">User</option>
+                                    <option value="check" {% if u.role == 'check' %}selected{% endif %} class="bg-gray-900">Чек улик (БД)</option>
+                                    <option value="full" {% if u.role == 'full' %}selected{% endif %} class="bg-gray-900">Фулл админ</option>
+                                </select>
+                                <button type="submit" class="bg-white/10 hover:bg-white/20 text-white px-3 py-1.5 rounded text-xs transition">Save</button>
+                            </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
