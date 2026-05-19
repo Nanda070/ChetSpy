@@ -1,70 +1,113 @@
 # ChetSpy | Evidence Management System
 
-**ChetSpy** — это изолированная система управления оперативной информацией и уликами. Разработана для обеспечения защищенного сбора, хранения и модерации данных с прямой интеграцией в инфраструктуру Discord. 
+ChetSpy — изолированная система управления цифровыми уликами и оперативными данными с интеграцией Discord.
 
-Интерфейс построен на принципах корпоративного минимализма (Dark Glassmorphism), логика изолирована от внешних файловых хостингов.
+Система предназначена для централизованного сбора, хранения и модерации доказательств с контролем доступа и локальным хранением данных без внешних хостингов.
 
-## Стек технологий
-- **Backend:** FastAPI (Python)
-- **Database:** SQLite (SQLAlchemy ORM)
-- **Frontend:** Jinja2 + Tailwind CSS
-- **Auth & API:** Discord OAuth2, Discord Webhooks
+## Features
 
-## Ключевой функционал
-- **Иерархия доступов:** Строгая ролевая модель (`user`, `check`, `full`). 
-- **OAuth2 Авторизация:** Отказ от классических паролей в пользу сессий через Discord API. Автоматическая эскалация прав до `full` для владельца сервера.
-- **Локальное хранилище медиа:** Файлы сохраняются физически на сервере с генерацией абсолютных URL, что обходит ограничения Discord на время жизни ссылок.
-- **Интеграция Webhooks:** Автоматический пуш отформатированных эмбедов с превью улик в выделенный канал.
-- **Управление БД:** Терминал модерации для изменения статусов (Ожидает / В кейс / Облава / Отказано) и привязки внешних документов.
+* Role-based access control (RBAC): `user`, `check`, `full`
+* Discord OAuth2 authentication (без паролей)
+* Автоматическая эскалация прав для владельца сервера
+* Локальное хранение файлов и медиа (self-hosted storage)
+* Генерация постоянных URL для загруженных файлов
+* Discord Webhook интеграция для отправки embed-уведомлений
+* Административная панель управления кейсами и статусами
+* Управление статусами улик:
 
-## Инструкция по развертыванию
+  * Pending
+  * In Case
+  * Operation
+  * Rejected
 
-### 1. Подготовка окружения
-Клонируйте репозиторий и инициализируйте виртуальную среду:
+## Tech Stack
+
+* **Backend:** FastAPI (Python)
+* **Database:** SQLite + SQLAlchemy ORM
+* **Frontend:** Jinja2 + Tailwind CSS
+* **Auth:** Discord OAuth2
+* **Integration:** Discord Webhooks
+* **Storage:** Local filesystem
+
+
+## Architecture
+
+* Fully isolated backend with no external file dependencies
+* Local media storage with persistent public URLs
+* Event-driven updates via Discord webhooks
+* Security-first design with OAuth2 authentication
+* Minimalist UI (Dark Glassmorphism style)
+
+---
+
+## Installation
+
+### 1. Clone repository
+
 ```bash
-git clone <URL_ВАШЕГО_РЕПОЗИТОРИЯ>
+git clone <REPOSITORY_URL>
 cd ChetSpy
-python3 -m venv venv
-source venv/bin/activate  # Для Linux/macOS
-# venv\Scripts\activate   # Для Windows
+```
 
-Установите зависимости:
+### 2. Create virtual environment
+
+```bash
+python3 -m venv venv
+source venv/bin/activate  # Linux/macOS
+# venv\Scripts\activate   # Windows
+```
+
+### 3. Install dependencies
 
 ```bash
 pip install fastapi uvicorn sqlalchemy python-multipart httpx python-jose jinja2 aiofiles python-dotenv
-
 ```
 
-### 2. Конфигурация среды
+---
 
-Создайте файл `.env` в корневой директории проекта со следующими параметрами:
+## Configuration
+
+Create `.env` file in root directory:
 
 ```env
-DISCORD_CLIENT_ID=ваш_client_id
-DISCORD_CLIENT_SECRET=ваш_client_secret
-DISCORD_REDIRECT_URI=http://ВАШ_IP:8000/auth/callback
-DISCORD_WEBHOOK_URL=ваш_webhook_url
-SECRET_KEY=сгенерируйте_длинную_случайную_строку
-ADMIN_DISCORD_ID=ваш_discord_id
-
+DISCORD_CLIENT_ID=your_client_id
+DISCORD_CLIENT_SECRET=your_client_secret
+DISCORD_REDIRECT_URI=http://localhost:8000/auth/callback
+DISCORD_WEBHOOK_URL=your_webhook_url
+SECRET_KEY=your_secret_key
+ADMIN_DISCORD_ID=your_discord_id
 ```
 
-> **Внимание:** В `DISCORD_REDIRECT_URI` должен быть указан точный адрес, включая протокол и порт. Для локальной разработки используйте `http://localhost:8000/auth/callback`. Аналогичный URL должен быть жестко прописан во вкладке OAuth2 -> Redirects в Discord Developer Portal.
+> Make sure `DISCORD_REDIRECT_URI` matches your Discord Developer Portal OAuth2 settings.
 
-### 3. Запуск сервера
+---
+
+## Run Server
 
 ```bash
 uvicorn app:app --host 0.0.0.0 --port 8000
-
 ```
 
-При первом старте система автоматически создаст необходимые директории (`static/uploads`, `templates`) и сгенерирует файл базы данных `chetspy.db`.
+On first launch, the system will automatically:
 
-## Управление правами
+* Create required directories (`static/uploads`, `templates`)
+* Initialize database (`chetspy.db`)
 
-Система не требует ручного вмешательства в БД для получения прав администратора.
+## Access Control
 
-1. Укажите свой Discord ID в переменной `ADMIN_DISCORD_ID` (файл `.env`).
-2. Авторизуйтесь на сайте через Discord.
-3. Система распознает ID и перманентно выдаст права `full`.
-4. Дальнейшее распределение доступов (`check`, `full`) для других пользователей осуществляется через графический интерфейс во вкладке "Управление".
+1. Set `ADMIN_DISCORD_ID` in `.env`
+2. Login via Discord OAuth2
+3. System assigns `full` role automatically to admin
+4. Additional roles managed via admin panel
+
+## Roadmap
+
+* Advanced case linking system
+* Audit logs for all actions
+* API token support for external services
+* Encryption layer for sensitive evidence
+* Multi-server deployment mode
+
+## License
+
+Specify your license here (e.g. MIT / Proprietary).
